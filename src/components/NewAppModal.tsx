@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
+import { useAuth } from '../contexts/AuthContext';
 import type { Application, Stage } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { X, ChevronRight, ChevronLeft, Plus, Trash2, GripVertical } from 'lucide-react';
@@ -49,6 +50,8 @@ const STAGE_TEMPLATES = {
 
 export function NewAppModal() {
   const { isNewAppModalOpen, closeNewAppModal, addApplication } = useStore();
+  const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
   
   // Form State
@@ -112,7 +115,8 @@ export function NewAppModal() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!user) return;
     const newApp: Application = {
       ...formData as Application,
       id: uuidv4(),
@@ -127,13 +131,19 @@ export function NewAppModal() {
       }))
     };
     
-    // Set the first stage status to 'Tamamlandı' or 'Devam Ediyor'
+    // Set the first stage status to 'Tamamlandı'
     if (newApp.stages.length > 0) {
       newApp.stages[0].status = 'Tamamlandı';
     }
 
-    addApplication(newApp);
-    resetAndClose();
+    try {
+      setSaving(true);
+      await addApplication(newApp, user.id);
+      resetAndClose();
+    } catch (err) {
+      console.error('Başvuru kaydedilemedi:', err);
+      setSaving(false);
+    }
   };
 
   const resetAndClose = () => {
@@ -283,9 +293,10 @@ export function NewAppModal() {
           ) : (
             <button 
               onClick={handleSave}
-              className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium flex items-center gap-1 hover:bg-green-700"
+              disabled={saving}
+              className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium flex items-center gap-1 hover:bg-green-700 disabled:opacity-60"
             >
-              Başvuruyu Kaydet ✓
+              {saving ? 'Kaydediliyor...' : 'Başvuruyu Kaydet ✓'}
             </button>
           )}
         </div>

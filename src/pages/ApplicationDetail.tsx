@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Clock, Building, MapPin, Calendar, Link as LinkIcon, Edit, Trash2, CheckCircle2, Circle, GripVertical, Plus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -82,6 +83,7 @@ export function ApplicationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { applications, updateApplication, deleteApplication } = useStore();
+  const { user } = useAuth();
   
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
@@ -103,13 +105,15 @@ export function ApplicationDetail() {
   };
   
   const handleSaveEdit = () => {
-    updateApplication(app.id, editFormData);
+    if (!user) return;
+    updateApplication(app.id, editFormData, user.id);
     setIsEditing(false);
   };
 
   const handleDelete = () => {
+    if (!user) return;
     if (confirm('Bu başvuruyu silmek istediğinize emin misiniz?')) {
-      deleteApplication(app.id);
+      deleteApplication(app.id, user.id);
       navigate('/');
     }
   };
@@ -122,14 +126,16 @@ export function ApplicationDetail() {
   };
 
   const updateStageStatusExact = (stageId: string, status: 'Yapılacak' | 'Devam Ediyor' | 'Tamamlandı' | 'Atlandı') => {
+    if (!user) return;
     const newStages = app.stages.map(s => s.id === stageId ? { ...s, status } : s);
     const progress = Math.round((newStages.filter(s => s.status === 'Tamamlandı' || s.status === 'Atlandı').length / newStages.length) * 100) || 0;
-    updateApplication(app.id, { stages: newStages, progress });
+    updateApplication(app.id, { stages: newStages, progress }, user.id);
   };
 
   const updateStageDeadline = (stageId: string, deadline: string) => {
+    if (!user) return;
     const newStages = app.stages.map(s => s.id === stageId ? { ...s, deadline: deadline || undefined } : s);
-    updateApplication(app.id, { stages: newStages });
+    updateApplication(app.id, { stages: newStages }, user.id);
   };
 
   const sensors = useSensors(
@@ -138,24 +144,27 @@ export function ApplicationDetail() {
   );
 
   const handleDragEnd = (event: any) => {
+    if (!user) return;
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const oldIndex = app.stages.findIndex(s => s.id === active.id);
       const newIndex = app.stages.findIndex(s => s.id === over.id);
       const newStages = arrayMove(app.stages, oldIndex, newIndex);
-      updateApplication(app.id, { stages: newStages });
+      updateApplication(app.id, { stages: newStages }, user.id);
     }
   };
 
   const removeStage = (stageId: string) => {
+    if (!user) return;
     if (confirm("Bu aşamayı silmek istediğinize emin misiniz?")) {
       const newStages = app.stages.filter(s => s.id !== stageId);
       const progress = newStages.length ? Math.round((newStages.filter(s => s.status === 'Tamamlandı' || s.status === 'Atlandı').length / newStages.length) * 100) : 0;
-      updateApplication(app.id, { stages: newStages, progress });
+      updateApplication(app.id, { stages: newStages, progress }, user.id);
     }
   };
 
   const addNewStage = () => {
+    if (!user) return;
     const name = prompt("Yeni Aşama Adı:");
     if (name && name.trim()) {
       const newStages = [...app.stages, {
@@ -164,7 +173,7 @@ export function ApplicationDetail() {
         status: 'Yapılacak' as const
       }];
       const progress = newStages.length ? Math.round((newStages.filter(s => s.status === 'Tamamlandı' || s.status === 'Atlandı').length / newStages.length) * 100) : 0;
-      updateApplication(app.id, { stages: newStages, progress });
+      updateApplication(app.id, { stages: newStages, progress }, user.id);
     }
   };
 
@@ -201,7 +210,7 @@ export function ApplicationDetail() {
         <div className="flex items-center gap-2">
           <select 
             value={app.status}
-            onChange={(e) => updateApplication(app.id, { status: e.target.value as any })}
+          onChange={(e) => user && updateApplication(app.id, { status: e.target.value as any }, user.id)}
             className="h-9 px-3 rounded-md border text-sm bg-background font-medium"
           >
             {['Hazırlık', 'Başvuruldu', 'Devam Ediyor', 'Mülakat', 'Teklif', 'Kabul', 'Red', 'İptal'].map(s => (

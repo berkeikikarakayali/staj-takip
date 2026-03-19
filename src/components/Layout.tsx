@@ -1,23 +1,89 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { 
   LayoutDashboard, 
   CalendarDays, 
   BarChart3, 
   Settings,
   BriefcaseBusiness,
-  Plus
+  Plus,
+  LogOut,
+  User,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStore } from '../store/useStore';
+import { useAuth } from '../contexts/AuthContext';
 import { NewAppModal } from './NewAppModal';
 
 export function Layout() {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/calendar', icon: CalendarDays, label: 'Takvim' },
     { to: '/stats', icon: BarChart3, label: 'İstatistikler' },
     { to: '/settings', icon: Settings, label: 'Ayarlar' },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  // Get initials from user email or name
+  const getInitials = () => {
+    const name = user?.user_metadata?.full_name;
+    if (name) {
+      return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    return user?.email?.[0]?.toUpperCase() ?? '?';
+  };
+
+  const UserAvatar = () => (
+    <div className="relative">
+      <button
+        onClick={() => setUserMenuOpen(prev => !prev)}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
+      >
+        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs flex-shrink-0">
+          {getInitials()}
+        </div>
+        <div className="hidden md:block text-left min-w-0">
+          <p className="font-medium truncate leading-tight">
+            {user?.user_metadata?.full_name ?? user?.email?.split('@')[0]}
+          </p>
+          <p className="text-[11px] text-muted-foreground truncate leading-tight">{user?.email}</p>
+        </div>
+        <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", userMenuOpen && "rotate-180")} />
+      </button>
+
+      {userMenuOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+          <div className="absolute bottom-full mb-2 left-0 right-0 z-50 bg-popover border rounded-lg shadow-lg p-1 min-w-[180px]">
+            <button
+              onClick={() => { navigate('/settings'); setUserMenuOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
+            >
+              <User className="w-4 h-4 text-muted-foreground" />
+              Profilim & Ayarlar
+            </button>
+            <div className="my-1 border-t" />
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Çıkış Yap
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <div className="flex h-[100dvh] bg-muted/20">
@@ -46,13 +112,20 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
+        {/* User section at bottom of sidebar */}
+        <div className="p-3 border-t">
+          <UserAvatar />
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="md:hidden flex items-center h-14 border-b bg-background px-4">
-          <BriefcaseBusiness className="w-5 h-5 text-primary mr-2" />
-          <span className="font-bold">StajTakip</span>
+        <header className="md:hidden flex items-center justify-between h-14 border-b bg-background px-4">
+          <div className="flex items-center gap-2">
+            <BriefcaseBusiness className="w-5 h-5 text-primary" />
+            <span className="font-bold">StajTakip</span>
+          </div>
+          <UserAvatar />
         </header>
         <div className="flex-1 overflow-auto p-4 md:p-8 relative">
           <Outlet />

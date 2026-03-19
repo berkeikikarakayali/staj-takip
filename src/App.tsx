@@ -10,7 +10,11 @@ import { ProtectedRoute } from './components/layout/ProtectedRoute';
 
 function AppRoutes() {
   const theme = useStore(state => state.theme);
+  const loadApplications = useStore(state => state.loadApplications);
+  const clearApplications = useStore(state => state.clearApplications);
+  const { session, user } = useAuth();
 
+  // Apply theme
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark', 'theme-light-blue', 'theme-dark-blue');
@@ -18,8 +22,15 @@ function AppRoutes() {
       root.classList.add(theme);
     }
   }, [theme]);
-  
-  const { session } = useAuth();
+
+  // Load/clear data on auth state change
+  useEffect(() => {
+    if (user) {
+      loadApplications(user.id);
+    } else {
+      clearApplications();
+    }
+  }, [user]);
 
   return (
     <Routes>
