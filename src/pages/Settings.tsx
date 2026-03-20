@@ -7,7 +7,6 @@ import { useLanguage, type Language } from '../contexts/LanguageContext';
 const LANGUAGES: { code: Language; flag: string }[] = [
   { code: 'en', flag: '🇬🇧' },
   { code: 'tr', flag: '🇹🇷' },
-  { code: 'de', flag: '🇩🇪' },
 ];
 
 export function Settings() {
@@ -18,7 +17,6 @@ export function Settings() {
   const langLabels: Record<Language, string> = {
     en: t.langEn,
     tr: t.langTr,
-    de: t.langDe,
   };
 
   const handleExport = () => {

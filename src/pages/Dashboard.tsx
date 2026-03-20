@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import type { Application } from '../types';
 import { isBefore, addDays, formatDistanceToNow, parseISO } from 'date-fns';
-import { tr as trLocale, enUS, de as deLocale, type Locale } from 'date-fns/locale';
+import { tr as trLocale, enUS, type Locale } from 'date-fns/locale';
 import { Search, Plus, List, Grid, MoreVertical } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLanguage, type Language } from '../contexts/LanguageContext';
@@ -10,7 +10,6 @@ import { useLanguage, type Language } from '../contexts/LanguageContext';
 const localeMap: Record<Language, Locale> = {
   tr: trLocale,
   en: enUS,
-  de: deLocale,
 };
 
 // Instead of UI library components that might be missing, I'll use standard Tailwind to ensure it works properly, but I will simulate the Shadcn look in case it isn't properly wired.
@@ -154,7 +153,7 @@ function ApplicationCard({ app }: { app: Application }) {
         <div className="p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-2">
           <Badge className={cn("rounded-sm border-none pointer-events-none shadow-none text-[10px]", priorityColor)} variant="outline">
-            {app.priority === 'Kritik' ? '🔴' : app.priority === 'Yüksek' ? '🟠' : app.priority === 'Düşük' ? '🟢' : '🔵'} {app.priority}
+            {app.priority === 'Kritik' ? '🔴' : app.priority === 'Yüksek' ? '🟠' : app.priority === 'Düşük' ? '🟢' : '🔵'} {t.priorityMap[app.priority] || app.priority}
           </Badge>
           <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 -mr-2 -mt-2">
             <MoreVertical className="h-4 w-4" />
@@ -183,7 +182,7 @@ function ApplicationCard({ app }: { app: Application }) {
             )}
             <div className="flex justify-between items-center text-xs">
                <span className="font-medium px-2 py-0.5 rounded bg-muted">
-                 {app.status}
+                 {t.statusMap[app.status] || app.status}
                </span>
                <span className="text-muted-foreground text-[10px]">
                  {t.updated} {formatDistanceToNow(parseISO(app.updatedAt), { addSuffix: true, locale })}

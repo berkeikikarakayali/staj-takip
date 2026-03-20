@@ -4,23 +4,30 @@ import { useStore } from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Clock, Building, MapPin, Calendar, Link as LinkIcon, Edit, Trash2, CheckCircle2, Circle, GripVertical, Plus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr as trLocale, enUS, type Locale } from 'date-fns/locale';
 import { v4 as uuidv4 } from 'uuid';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useLanguage, type Language } from '../contexts/LanguageContext';
 
-function SortableTimelineStage({ 
-  stage, 
-  isActive, 
-  isDone, 
-  toggleStageStatus, 
-  updateStageStatusExact, 
-  updateStageDeadline, 
-  removeStage 
+const localeMap: Record<Language, Locale> = {
+  tr: trLocale,
+  en: enUS,
+};
+
+function SortableTimelineStage({
+  stage,
+  isActive,
+  isDone,
+  toggleStageStatus,
+  updateStageStatusExact,
+  updateStageDeadline,
+  removeStage,
+  t,
 }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: stage.id });
-  
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -45,25 +52,25 @@ function SortableTimelineStage({
           <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
              <h3 className={`font-semibold text-base ${isDone ? 'line-through text-muted-foreground' : ''}`}>{stage.name}</h3>
              <div className="flex items-center gap-2">
-               <select 
+               <select
                  value={stage.status}
                  onChange={(e) => updateStageStatusExact(stage.id, e.target.value)}
                  className={`rounded-md text-xs font-medium transition-colors border px-2 py-1 outline-none cursor-pointer ${isDone ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' : isActive ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' : 'bg-muted hover:bg-muted/80'}`}
                >
-                 <option value="Yapılacak">Yapılacak</option>
-                 <option value="Devam Ediyor">Devam Ediyor ⏳</option>
-                 <option value="Tamamlandı">Tamamlandı ✓</option>
-                 <option value="Atlandı">Atlandı ⏭</option>
+                 <option value="Yapılacak">{t.stageTodo}</option>
+                 <option value="Devam Ediyor">{t.stageInProgress}</option>
+                 <option value="Tamamlandı">{t.stageDone}</option>
+                 <option value="Atlandı">{t.stageSkipped}</option>
                </select>
-               <button onClick={() => removeStage(stage.id)} className="text-destructive hover:bg-destructive/10 p-1.5 rounded transition-colors" title="Aşamayı Sil">
+               <button onClick={() => removeStage(stage.id)} className="text-destructive hover:bg-destructive/10 p-1.5 rounded transition-colors" title={t.deleteStageTitle}>
                  <Trash2 className="w-4 h-4" />
                </button>
              </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
              <Clock className="w-3 h-3 text-muted-foreground" />
-             <span className="text-xs text-muted-foreground">Son Tarih:</span>
-             <input 
+             <span className="text-xs text-muted-foreground">{t.deadline}</span>
+             <input
                type="date"
                value={stage.deadline || ''}
                onChange={(e) => updateStageDeadline(stage.id, e.target.value)}
@@ -84,17 +91,19 @@ export function ApplicationDetail() {
   const navigate = useNavigate();
   const { applications, updateApplication, deleteApplication } = useStore();
   const { user } = useAuth();
-  
+  const { t, language } = useLanguage();
+  const locale = localeMap[language];
+
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
-  
+
   const app = applications.find(a => a.id === id);
 
   if (!app) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full">
-        <h3 className="text-xl font-bold mb-2">Başvuru Bulunamadı</h3>
-        <button onClick={() => navigate('/')} className="text-primary hover:underline">Dashboard'a Dön</button>
+        <h3 className="text-xl font-bold mb-2">{t.appNotFound}</h3>
+        <button onClick={() => navigate('/')} className="text-primary hover:underline">{t.backToDashboard}</button>
       </div>
     );
   }
@@ -103,7 +112,7 @@ export function ApplicationDetail() {
     setEditFormData({ ...app });
     setIsEditing(true);
   };
-  
+
   const handleSaveEdit = () => {
     if (!user) return;
     updateApplication(app.id, editFormData, user.id);
@@ -112,7 +121,7 @@ export function ApplicationDetail() {
 
   const handleDelete = () => {
     if (!user) return;
-    if (confirm('Bu başvuruyu silmek istediğinize emin misiniz?')) {
+    if (confirm(t.deleteAppConfirm)) {
       deleteApplication(app.id, user.id);
       navigate('/');
     }
@@ -156,7 +165,7 @@ export function ApplicationDetail() {
 
   const removeStage = (stageId: string) => {
     if (!user) return;
-    if (confirm("Bu aşamayı silmek istediğinize emin misiniz?")) {
+    if (confirm(t.deleteStageConfirm)) {
       const newStages = app.stages.filter(s => s.id !== stageId);
       const progress = newStages.length ? Math.round((newStages.filter(s => s.status === 'Tamamlandı' || s.status === 'Atlandı').length / newStages.length) * 100) : 0;
       updateApplication(app.id, { stages: newStages, progress }, user.id);
@@ -165,7 +174,7 @@ export function ApplicationDetail() {
 
   const addNewStage = () => {
     if (!user) return;
-    const name = prompt("Yeni Aşama Adı:");
+    const name = prompt(t.newStageName);
     if (name && name.trim()) {
       const newStages = [...app.stages, {
         id: uuidv4(),
@@ -188,8 +197,8 @@ export function ApplicationDetail() {
           <div>
             {isEditing ? (
               <div className="flex flex-col gap-2">
-                <input value={editFormData.companyName || ''} onChange={e => setEditFormData({...editFormData, companyName: e.target.value})} className="h-8 px-2 text-lg font-bold border rounded-md bg-background" placeholder="Şirket Adı" />
-                <input value={editFormData.position || ''} onChange={e => setEditFormData({...editFormData, position: e.target.value})} className="h-8 px-2 text-md font-semibold border rounded-md bg-background" placeholder="Pozisyon" />
+                <input value={editFormData.companyName || ''} onChange={e => setEditFormData({...editFormData, companyName: e.target.value})} className="h-8 px-2 text-lg font-bold border rounded-md bg-background" placeholder={t.editCompanyName} />
+                <input value={editFormData.position || ''} onChange={e => setEditFormData({...editFormData, position: e.target.value})} className="h-8 px-2 text-md font-semibold border rounded-md bg-background" placeholder={t.editPosition} />
               </div>
             ) : (
               <>
@@ -199,34 +208,34 @@ export function ApplicationDetail() {
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
                   {app.location && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {app.location}</span>}
-                  <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {format(parseISO(app.appliedDate), 'dd MMM yyyy', { locale: tr })}</span>
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full border bg-muted/50 text-foreground font-medium text-xs">Durum: {app.status}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {format(parseISO(app.appliedDate), 'dd MMM yyyy', { locale })}</span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full border bg-muted/50 text-foreground font-medium text-xs">{t.statusLabel} {t.statusMap[app.status] || app.status}</span>
                 </div>
               </>
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <select 
+          <select
             value={app.status}
-          onChange={(e) => user && updateApplication(app.id, { status: e.target.value as any }, user.id)}
+            onChange={(e) => user && updateApplication(app.id, { status: e.target.value as any }, user.id)}
             className="h-9 px-3 rounded-md border text-sm bg-background font-medium"
           >
-            {['Hazırlık', 'Başvuruldu', 'Devam Ediyor', 'Mülakat', 'Teklif', 'Kabul', 'Red', 'İptal'].map(s => (
-              <option key={s} value={s}>{s}</option>
+            {(['Hazırlık', 'Başvuruldu', 'Devam Ediyor', 'Mülakat', 'Teklif', 'Kabul', 'Red', 'İptal'] as const).map(s => (
+              <option key={s} value={s}>{t.statusMap[s] || s}</option>
             ))}
           </select>
           {isEditing ? (
             <button onClick={handleSaveEdit} className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium text-sm transition-colors shadow-sm">
-              Kaydet
+              {t.save}
             </button>
           ) : (
-            <button onClick={handleEditClick} className="p-2 border rounded-md hover:bg-muted text-muted-foreground transition-colors" title="Ayrıntıları Düzenle">
+            <button onClick={handleEditClick} className="p-2 border rounded-md hover:bg-muted text-muted-foreground transition-colors" title={t.editTitle}>
               <Edit className="w-4 h-4" />
             </button>
           )}
-          <button onClick={handleDelete} className="p-2 border rounded-md hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors" title="Sil">
+          <button onClick={handleDelete} className="p-2 border rounded-md hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors" title={t.deleteTitle}>
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -235,8 +244,8 @@ export function ApplicationDetail() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column - Timeline */}
         <div className="md:col-span-2 space-y-4">
-          <h2 className="text-lg font-semibold border-b pb-2">Aşama Takibi</h2>
-          
+          <h2 className="text-lg font-semibold border-b pb-2">{t.stageTracking}</h2>
+
           <div className="relative pl-6 space-y-6 before:absolute before:inset-0 before:ml-8 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-muted before:to-transparent">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={app.stages.map(s => s.id)} strategy={verticalListSortingStrategy}>
@@ -244,25 +253,26 @@ export function ApplicationDetail() {
                   const isActive = stage.status === 'Devam Ediyor';
                   const isDone = stage.status === 'Tamamlandı';
                   return (
-                    <SortableTimelineStage 
-                      key={stage.id} 
-                      stage={stage} 
-                      isActive={isActive} 
-                      isDone={isDone} 
-                      toggleStageStatus={toggleStageStatus} 
-                      updateStageStatusExact={updateStageStatusExact} 
-                      updateStageDeadline={updateStageDeadline} 
-                      removeStage={removeStage} 
+                    <SortableTimelineStage
+                      key={stage.id}
+                      stage={stage}
+                      isActive={isActive}
+                      isDone={isDone}
+                      toggleStageStatus={toggleStageStatus}
+                      updateStageStatusExact={updateStageStatusExact}
+                      updateStageDeadline={updateStageDeadline}
+                      removeStage={removeStage}
+                      t={t}
                     />
                   );
                 })}
               </SortableContext>
             </DndContext>
           </div>
-          
+
           <div className="flex justify-center mt-6">
             <button onClick={addNewStage} className="px-4 py-2 border border-dashed rounded-full text-sm font-medium hover:bg-muted text-muted-foreground flex items-center gap-2 transition-colors">
-              <Plus className="w-4 h-4" /> Yeni Aşama Ekle
+              <Plus className="w-4 h-4" /> {t.addStage}
             </button>
           </div>
         </div>
@@ -270,55 +280,55 @@ export function ApplicationDetail() {
         {/* Right Column - Details */}
         <div className="space-y-6">
           <div className="bg-card rounded-xl border p-5 shadow-sm">
-            <h3 className="font-semibold border-b pb-2 mb-4">Başvuru Detayları</h3>
+            <h3 className="font-semibold border-b pb-2 mb-4">{t.appDetails}</h3>
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-medium block mb-1">Şehir/Konum</label>
+                  <label className="text-xs font-medium block mb-1">{t.editCity}</label>
                   <input value={editFormData.location || ''} onChange={e => setEditFormData({...editFormData, location: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">Çalışma Modeli</label>
-                  <input value={editFormData.workModel || ''} onChange={e => setEditFormData({...editFormData, workModel: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder="Uzaktan, Hibrit, Ofis..." />
+                  <label className="text-xs font-medium block mb-1">{t.editWorkModel}</label>
+                  <input value={editFormData.workModel || ''} onChange={e => setEditFormData({...editFormData, workModel: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder={t.editWorkModelPlaceholder} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">Staj Türü</label>
-                  <input value={editFormData.type || ''} onChange={e => setEditFormData({...editFormData, type: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder="Zorunlu, Gönüllü, vb." />
+                  <label className="text-xs font-medium block mb-1">{t.editInternshipType}</label>
+                  <input value={editFormData.type || ''} onChange={e => setEditFormData({...editFormData, type: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder={t.editInternshipTypePlaceholder} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">Beklenen Maaş</label>
+                  <label className="text-xs font-medium block mb-1">{t.editSalary}</label>
                   <input value={editFormData.salary || ''} onChange={e => setEditFormData({...editFormData, salary: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">Başvuru Linki (URL)</label>
+                  <label className="text-xs font-medium block mb-1">{t.editAppLink}</label>
                   <input value={editFormData.url || ''} onChange={e => setEditFormData({...editFormData, url: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder="https://..." />
                 </div>
-                 <div>
-                  <label className="text-xs font-medium block mb-1">Kaynak Platform</label>
-                  <input value={editFormData.source || ''} onChange={e => setEditFormData({...editFormData, source: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder="LinkedIn, Kariyer, vb." />
+                <div>
+                  <label className="text-xs font-medium block mb-1">{t.editSourcePlatform}</label>
+                  <input value={editFormData.source || ''} onChange={e => setEditFormData({...editFormData, source: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" placeholder={t.editSourcePlatformPlaceholder} />
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <span className="text-xs text-muted-foreground block mb-1">Çalışma Modeli & Türü</span>
+                  <span className="text-xs text-muted-foreground block mb-1">{t.workModelAndType}</span>
                   <p className="text-sm font-medium">{app.workModel || '-'} • {app.type || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-xs text-muted-foreground block mb-1">Beklenen Maaş</span>
-                  <p className="text-sm font-medium">{app.salary || 'Belirtilmedi'}</p>
+                  <span className="text-xs text-muted-foreground block mb-1">{t.expectedSalary}</span>
+                  <p className="text-sm font-medium">{app.salary || t.notSpecified}</p>
                 </div>
                 {app.url && (
                   <div>
-                    <span className="text-xs text-muted-foreground block mb-1">Başvuru Linki</span>
+                    <span className="text-xs text-muted-foreground block mb-1">{t.appLink}</span>
                     <a href={app.url} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-                      <LinkIcon className="w-3 h-3" /> Linke Git
+                      <LinkIcon className="w-3 h-3" /> {t.goToLink}
                     </a>
                   </div>
                 )}
                 {app.source && (
                   <div>
-                    <span className="text-xs text-muted-foreground block mb-1">Kaynak</span>
+                    <span className="text-xs text-muted-foreground block mb-1">{t.source}</span>
                     <p className="text-sm font-medium">{app.source}</p>
                   </div>
                 )}
@@ -327,19 +337,19 @@ export function ApplicationDetail() {
           </div>
 
           <div className="bg-card rounded-xl border p-5 shadow-sm">
-            <h3 className="font-semibold border-b pb-2 mb-4">İletişim & Notlar</h3>
+            <h3 className="font-semibold border-b pb-2 mb-4">{t.contactAndNotes}</h3>
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-medium block mb-1">İletişim Kişisi (Ad/Unvan)</label>
+                  <label className="text-xs font-medium block mb-1">{t.editContactName}</label>
                   <input value={editFormData.contactName || ''} onChange={e => setEditFormData({...editFormData, contactName: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">İletişim E-posta / Telefon</label>
+                  <label className="text-xs font-medium block mb-1">{t.editContactEmail}</label>
                   <input value={editFormData.contactEmail || ''} onChange={e => setEditFormData({...editFormData, contactEmail: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1">Genel Notlar</label>
+                  <label className="text-xs font-medium block mb-1">{t.generalNotes}</label>
                   <textarea rows={4} value={editFormData.notes || ''} onChange={e => setEditFormData({...editFormData, notes: e.target.value})} className="w-full text-sm border rounded p-1.5 bg-background focus:ring-1 focus:ring-primary outline-none" />
                 </div>
               </div>
@@ -347,15 +357,15 @@ export function ApplicationDetail() {
               <div className="space-y-4">
                 {app.contactName && (
                   <div>
-                    <span className="text-xs text-muted-foreground block mb-1">İletişim Kişisi</span>
+                    <span className="text-xs text-muted-foreground block mb-1">{t.contactPerson}</span>
                     <p className="text-sm font-medium">{app.contactName}</p>
                     <p className="text-xs text-muted-foreground">{app.contactEmail}</p>
                   </div>
                 )}
                 <div>
-                  <span className="text-xs text-muted-foreground block mb-1">Genel Notlar</span>
+                  <span className="text-xs text-muted-foreground block mb-1">{t.generalNotes}</span>
                   <div className="text-sm whitespace-pre-wrap bg-muted/30 p-3 rounded-md border min-h-[100px]">
-                    {app.notes || <span className="text-muted-foreground italic">Not eklenmemiş...</span>}
+                    {app.notes || <span className="text-muted-foreground italic">{t.noNotes}</span>}
                   </div>
                 </div>
               </div>

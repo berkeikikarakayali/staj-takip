@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-export type Language = 'en' | 'tr' | 'de';
+export type Language = 'en' | 'tr';
 
 export interface Translations {
   // Layout / Nav
@@ -21,7 +21,6 @@ export interface Translations {
   languageSectionDesc: string;
   langEn: string;
   langTr: string;
-  langDe: string;
 
   // Theme section
   themeSection: string;
@@ -99,6 +98,103 @@ export interface Translations {
   priorityHigh: string;
   priorityMedium: string;
   priorityLow: string;
+
+  // Maps for translating DB values (stored as Turkish) to display language
+  statusMap: Record<string, string>;
+  priorityMap: Record<string, string>;
+
+  // Application Detail page
+  appNotFound: string;
+  backToDashboard: string;
+  stageTracking: string;
+  addStage: string;
+  newStageName: string;
+  deleteStageConfirm: string;
+  deleteAppConfirm: string;
+  deadline: string;
+  stageTodo: string;
+  stageInProgress: string;
+  stageDone: string;
+  stageSkipped: string;
+  deleteStageTitle: string;
+  save: string;
+  editTitle: string;
+  deleteTitle: string;
+  statusLabel: string;
+  appDetails: string;
+  workModelAndType: string;
+  expectedSalary: string;
+  notSpecified: string;
+  appLink: string;
+  goToLink: string;
+  source: string;
+  contactAndNotes: string;
+  contactPerson: string;
+  generalNotes: string;
+  noNotes: string;
+  editCity: string;
+  editWorkModel: string;
+  editWorkModelPlaceholder: string;
+  editInternshipType: string;
+  editInternshipTypePlaceholder: string;
+  editSalary: string;
+  editAppLink: string;
+  editSourcePlatform: string;
+  editSourcePlatformPlaceholder: string;
+  editContactName: string;
+  editContactEmail: string;
+  editCompanyName: string;
+  editPosition: string;
+
+  // NewAppModal
+  modalTitle: string;
+  modalStep: (step: number, total: number) => string;
+  modalCompanyName: string;
+  modalPosition: string;
+  modalDepartment: string;
+  modalCity: string;
+  modalPriority: string;
+  modalAppliedDate: string;
+  modalStagesDesc: string;
+  modalTemplateStandard: string;
+  modalTemplateFast: string;
+  modalTemplateDetailed: string;
+  modalTemplateEmpty: string;
+  modalNewStagePlaceholder: string;
+  modalAdd: string;
+  modalStageDeadlineTitle: string;
+  modalDeleteStageTitle: string;
+  modalFinalDesc: string;
+  modalAppUrl: string;
+  modalGeneralNote: string;
+  modalGeneralNotePlaceholder: string;
+  modalSummaryTitle: string;
+  modalSummaryStages: (n: number) => string;
+  modalSummaryPriority: string;
+  modalBack: string;
+  modalNext: string;
+  modalSaving: string;
+  modalSave: string;
+
+  // Stage template names (used in NewAppModal)
+  stageTemplates: {
+    standart: string[];
+    hizli: string[];
+    detayli: string[];
+    bos: string[];
+  };
+
+  // Onboarding Guide
+  guideNav: string;
+  guideTitle: string;
+  guideSubtitle: string;
+  guideContinue: string;
+  guideDontShow: string;
+  guideSteps: {
+    title: string;
+    desc: string;
+    icon: string;
+  }[];
 }
 
 const translations: Record<Language, Translations> = {
@@ -118,7 +214,6 @@ const translations: Record<Language, Translations> = {
     languageSectionDesc: 'Choose the display language for the application.',
     langEn: 'English',
     langTr: 'Turkish',
-    langDe: 'German',
 
     themeSection: 'Appearance & Theme',
     themeLight: 'Light',
@@ -128,7 +223,7 @@ const translations: Record<Language, Translations> = {
 
     dataSection: 'Data Management (Backup)',
     dataSectionDesc:
-      'Since there is no backend, all your data is stored only in your browser. We recommend exporting regularly to avoid data loss.',
+      'Export your application data as a JSON file for backup purposes, or import a previously exported file.',
     exportTitle: 'Export Data',
     exportDesc: 'Downloads all your applications as a JSON file.',
     exportBtn: 'Export',
@@ -188,6 +283,113 @@ const translations: Record<Language, Translations> = {
     priorityHigh: 'High',
     priorityMedium: 'Medium',
     priorityLow: 'Low',
+
+    statusMap: {
+      'Hazırlık': 'Preparation',
+      'Başvuruldu': 'Applied',
+      'Devam Ediyor': 'In Progress',
+      'Mülakat': 'Interview',
+      'Teklif': 'Offer',
+      'Kabul': 'Accepted',
+      'Red': 'Rejected',
+      'İptal': 'Cancelled',
+    },
+    priorityMap: {
+      'Küpk': 'Critical',
+      'Kritik': 'Critical',
+      'Yüksek': 'High',
+      'Orta': 'Medium',
+      'Düşük': 'Low',
+    },
+
+    appNotFound: 'Application Not Found',
+    backToDashboard: 'Back to Dashboard',
+    stageTracking: 'Stage Tracking',
+    addStage: 'Add New Stage',
+    newStageName: 'New Stage Name:',
+    deleteStageConfirm: 'Are you sure you want to delete this stage?',
+    deleteAppConfirm: 'Are you sure you want to delete this application?',
+    deadline: 'Deadline:',
+    stageTodo: 'To Do',
+    stageInProgress: 'In Progress ⏳',
+    stageDone: 'Done ✓',
+    stageSkipped: 'Skipped ⏭',
+    deleteStageTitle: 'Delete Stage',
+    save: 'Save',
+    editTitle: 'Edit Details',
+    deleteTitle: 'Delete',
+    statusLabel: 'Status:',
+    appDetails: 'Application Details',
+    workModelAndType: 'Work Model & Type',
+    expectedSalary: 'Expected Salary',
+    notSpecified: 'Not specified',
+    appLink: 'Application Link',
+    goToLink: 'Go to Link',
+    source: 'Source',
+    contactAndNotes: 'Contact & Notes',
+    contactPerson: 'Contact Person',
+    generalNotes: 'General Notes',
+    noNotes: 'No notes added...',
+    editCity: 'City / Location',
+    editWorkModel: 'Work Model',
+    editWorkModelPlaceholder: 'Remote, Hybrid, Office...',
+    editInternshipType: 'Internship Type',
+    editInternshipTypePlaceholder: 'Mandatory, Voluntary, etc.',
+    editSalary: 'Expected Salary',
+    editAppLink: 'Application Link (URL)',
+    editSourcePlatform: 'Source Platform',
+    editSourcePlatformPlaceholder: 'LinkedIn, Indeed, etc.',
+    editContactName: 'Contact Person (Name/Title)',
+    editContactEmail: 'Contact Email / Phone',
+    editCompanyName: 'Company Name',
+    editPosition: 'Position',
+
+    modalTitle: 'Add New Application',
+    modalStep: (step, total) => `Step ${step} / ${total}`,
+    modalCompanyName: 'Company Name *',
+    modalPosition: 'Position *',
+    modalDepartment: 'Department',
+    modalCity: 'City',
+    modalPriority: 'Priority *',
+    modalAppliedDate: 'Application Date *',
+    modalStagesDesc: 'Select or customize the stages for this application.',
+    modalTemplateStandard: 'Standard',
+    modalTemplateFast: 'Quick',
+    modalTemplateDetailed: 'Detailed',
+    modalTemplateEmpty: 'Empty',
+    modalNewStagePlaceholder: 'New stage name...',
+    modalAdd: 'Add',
+    modalStageDeadlineTitle: 'Stage Deadline',
+    modalDeleteStageTitle: 'Delete Stage',
+    modalFinalDesc: 'Final checks and optional details.',
+    modalAppUrl: 'Application URL',
+    modalGeneralNote: 'General Note',
+    modalGeneralNotePlaceholder: 'Salary expectation, important details...',
+    modalSummaryTitle: 'Summary',
+    modalSummaryStages: (n) => `${n}-Stage Process`,
+    modalSummaryPriority: 'Priority:',
+    modalBack: 'Back',
+    modalNext: 'Next',
+    modalSaving: 'Saving...',
+    modalSave: 'Save Application ✓',
+    stageTemplates: {
+      standart: ['Application Submitted', 'HR Interview', 'Technical Interview', 'Offer'],
+      hizli: ['Application Submitted', 'Interview', 'Result'],
+      detayli: ['Application Submitted', 'CV Sent', 'Online Test', 'HR Interview', 'Technical Interview', 'Final Interview', 'Reference Check', 'Offer Received'],
+      bos: [],
+    },
+    guideNav: 'Guide',
+    guideTitle: 'Welcome to StajTakip! 🎉',
+    guideSubtitle: 'Here\'s a quick overview of how to get the most out of the app.',
+    guideContinue: 'Get Started',
+    guideDontShow: 'Don\'t show again',
+    guideSteps: [
+      { icon: '📥', title: 'Add Applications', desc: 'Click the ➕ button in the bottom right to add a new internship application. Fill in company name, position, city and priority.' },
+      { icon: '📋', title: 'Track Stages', desc: 'Each application has stages (e.g. Applied → Interview → Offer). Mark stages as In Progress or Done to track where you stand.' },
+      { icon: '📅', title: 'Calendar View', desc: 'The Calendar page shows all your stage deadlines in a monthly view. Deadlines close to today are highlighted.' },
+      { icon: '📊', title: 'Statistics', desc: 'The Statistics page shows charts of your application statuses, priorities, and monthly trends.' },
+      { icon: '💾', title: 'Backup & Import', desc: 'Go to Settings → Data Management to export your data as a JSON file or restore from a backup.' },
+    ],
   },
   tr: {
     dashboard: 'Dashboard',
@@ -205,7 +407,6 @@ const translations: Record<Language, Translations> = {
     languageSectionDesc: 'Uygulamanın görüntüleme dilini seçin.',
     langEn: 'İngilizce',
     langTr: 'Türkçe',
-    langDe: 'Almanca',
 
     themeSection: 'Görünüm & Tema',
     themeLight: 'Açık (Light)',
@@ -215,7 +416,7 @@ const translations: Record<Language, Translations> = {
 
     dataSection: 'Veri Yönetimi (Yedekleme)',
     dataSectionDesc:
-      'Uygulama arka ucu (backend) olmadığı için tüm verileriniz yalnızca tarayıcınızın içinde saklanmaktadır. Veri kaybı yaşamamak için düzenli olarak dışa aktarmanızı öneririz.',
+      'Başvuru verilerinizi yedekleme amaçlı olarak JSON dosyası olarak dışa aktarabilir veya daha önce indirdiğiniz bir yedek dosyasını içe aktarabilirsiniz.',
     exportTitle: 'Verileri Dışa Aktar (Export)',
     exportDesc: 'Tüm başvurularınızı bir JSON dosyası olarak indirir.',
     exportBtn: 'Dışa Aktar',
@@ -243,7 +444,7 @@ const translations: Record<Language, Translations> = {
     statWaiting: 'Beklemede',
     statUpcoming: 'Yaklaşan',
 
-    upcomingDeadlines: 'Yaklaşan Deadline\'lar',
+    upcomingDeadlines: "Yaklaşan Deadline'lar",
     badgePast: 'GEÇMİŞ',
     badgeUrgent: 'ACİL',
     daysLeft: (n) => `${n} gün`,
@@ -276,94 +477,112 @@ const translations: Record<Language, Translations> = {
     priorityHigh: 'Yüksek',
     priorityMedium: 'Orta',
     priorityLow: 'Düşük',
-  },
-  de: {
-    dashboard: 'Dashboard',
-    calendar: 'Kalender',
-    stats: 'Statistiken',
-    settings: 'Einstellungen',
-    profileAndSettings: 'Profil & Einstellungen',
-    signOut: 'Abmelden',
-    addNew: 'Neue Bewerbung hinzufügen',
 
-    settingsTitle: 'Einstellungen',
-    settingsSubtitle: 'Sichern Sie Ihre Daten, importieren Sie sie und verwalten Sie Ihre Anwendung.',
+    statusMap: {
+      'Hazırlık': 'Hazırlık',
+      'Başvuruldu': 'Başvuruldu',
+      'Devam Ediyor': 'Devam Ediyor',
+      'Mülakat': 'Mülakat',
+      'Teklif': 'Teklif',
+      'Kabul': 'Kabul',
+      'Red': 'Red',
+      'İptal': 'İptal',
+    },
+    priorityMap: {
+      'Kritik': 'Kritik',
+      'Yüksek': 'Yüksek',
+      'Orta': 'Orta',
+      'Düşük': 'Düşük',
+    },
 
-    languageSection: 'Sprache',
-    languageSectionDesc: 'Wählen Sie die Anzeigesprache der Anwendung.',
-    langEn: 'Englisch',
-    langTr: 'Türkisch',
-    langDe: 'Deutsch',
+    appNotFound: 'Başvuru Bulunamadı',
+    backToDashboard: "Dashboard'a Dön",
+    stageTracking: 'Aşama Takibi',
+    addStage: 'Yeni Aşama Ekle',
+    newStageName: 'Yeni Aşama Adı:',
+    deleteStageConfirm: 'Bu aşamayı silmek istediğinize emin misiniz?',
+    deleteAppConfirm: 'Bu başvuruyu silmek istediğinize emin misiniz?',
+    deadline: 'Son Tarih:',
+    stageTodo: 'Yapılacak',
+    stageInProgress: 'Devam Ediyor ⏳',
+    stageDone: 'Tamamlandı ✓',
+    stageSkipped: 'Atlandı ⏭',
+    deleteStageTitle: 'Aşamayı Sil',
+    save: 'Kaydet',
+    editTitle: 'Ayrıntıları Düzenle',
+    deleteTitle: 'Sil',
+    statusLabel: 'Durum:',
+    appDetails: 'Başvuru Detayları',
+    workModelAndType: 'Çalışma Modeli & Türü',
+    expectedSalary: 'Beklenen Maaş',
+    notSpecified: 'Belirtilmedi',
+    appLink: 'Başvuru Linki',
+    goToLink: 'Linke Git',
+    source: 'Kaynak',
+    contactAndNotes: 'İletişim & Notlar',
+    contactPerson: 'İletişim Kişisi',
+    generalNotes: 'Genel Notlar',
+    noNotes: 'Not eklenmemiş...',
+    editCity: 'Şehir/Konum',
+    editWorkModel: 'Çalışma Modeli',
+    editWorkModelPlaceholder: 'Uzaktan, Hibrit, Ofis...',
+    editInternshipType: 'Staj Türü',
+    editInternshipTypePlaceholder: 'Zorunlu, Gönüllü, vb.',
+    editSalary: 'Beklenen Maaş',
+    editAppLink: 'Başvuru Linki (URL)',
+    editSourcePlatform: 'Kaynak Platform',
+    editSourcePlatformPlaceholder: 'LinkedIn, Kariyer, vb.',
+    editContactName: 'İletişim Kişisi (Ad/Unvan)',
+    editContactEmail: 'İletişim E-posta / Telefon',
+    editCompanyName: 'Şirket Adı',
+    editPosition: 'Pozisyon',
 
-    themeSection: 'Erscheinungsbild & Thema',
-    themeLight: 'Hell',
-    themeDark: 'Dunkel (Schwarz/Grau)',
-    themeLightBlue: 'Hellblau',
-    themeDarkBlue: 'Dunkelblau',
-
-    dataSection: 'Datenverwaltung (Sicherung)',
-    dataSectionDesc:
-      'Da es kein Backend gibt, werden alle Ihre Daten nur in Ihrem Browser gespeichert. Wir empfehlen regelmäßige Exporte, um Datenverlust zu vermeiden.',
-    exportTitle: 'Daten exportieren',
-    exportDesc: 'Lädt alle Ihre Bewerbungen als JSON-Datei herunter.',
-    exportBtn: 'Exportieren',
-    importTitle: 'Daten importieren',
-    importDesc: 'Lädt eine zuvor gespeicherte ".json"-Sicherungsdatei.',
-    importBtn: 'Importieren',
-
-    dangerZone: 'Gefahrenzone',
-    clearAll: 'Alle Daten löschen',
-    clearAllDesc: 'Löscht alle Praktikumsbewerbungsdaten aus dem Browser.',
-    clearBtn: 'Daten löschen',
-
-    confirmImport: (count) =>
-      `Warnung: Diese Aktion löscht alle Ihre aktuellen Daten und fügt die Daten aus der hochgeladenen Datei hinzu (${count} Bewerbungen). Möchten Sie fortfahren?`,
-    invalidFile:
-      'Ungültiges Dateiformat. Bitte wählen Sie eine von StajTakip erstellte Sicherungsdatei.',
-    fileReadError: 'Beim Lesen der Datei ist ein Fehler aufgetreten.',
-    confirmClear:
-      'ACHTUNG! Alle Ihre Bewerbungsdaten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden. Sind Sie sicher?',
-
-    statTotal: 'Gesamt',
-    statActive: 'Aktiv',
-    statAccepted: 'Angenommen',
-    statRejected: 'Abgelehnt',
-    statWaiting: 'Ausstehend',
-    statUpcoming: 'Bevorstehend',
-
-    upcomingDeadlines: 'Bevorstehende Deadlines',
-    badgePast: 'ABGELAUFEN',
-    badgeUrgent: 'DRINGEND',
-    daysLeft: (n) => `${n} Tag${n === 1 ? '' : 'e'}`,
-
-    progress: 'Fortschritt',
-    next: 'Nächstes:',
-    updated: 'Akt:',
-
-    noAppsTitle: 'Noch keine Bewerbungen',
-    noAppsDesc: 'Fügen Sie Ihre erste Bewerbung hinzu, um den Prozess zu verfolgen.',
-    addFirstApp: 'Erste Bewerbung hinzufügen',
-
-    searchPlaceholder: 'Unternehmen oder Position suchen...',
-
-    calendarTitle: 'Kalender',
-    weekDays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
-
-    statsTitle: 'Statistiken',
-    statsSubtitle: 'Zusammenfassende Analysen und Erfolgsdiagramme Ihrer Bewerbungen.',
-    statsNoData: 'Keine Daten',
-    statsNoDataDesc: 'Sie müssen mindestens eine Bewerbung hinzufügen, um Statistiken zu sehen.',
-    statsStatusDist: 'Statusverteilung',
-    statsPriorityDist: 'Prioritätsverteilung',
-    statsMonthlyTrend: (year) => `Bewerbungstrend ${year}`,
-    monthNames: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-    statusAccepted: 'Angenommen',
-    statusRejected: 'Abgelehnt',
-    statusOngoing: 'Laufend',
-    priorityCritical: 'Kritisch',
-    priorityHigh: 'Hoch',
-    priorityMedium: 'Mittel',
-    priorityLow: 'Niedrig',
+    modalTitle: 'Yeni Başvuru Ekle',
+    modalStep: (step, total) => `Adım ${step} / ${total}`,
+    modalCompanyName: 'Şirket Adı *',
+    modalPosition: 'Pozisyon *',
+    modalDepartment: 'Departman',
+    modalCity: 'Şehir',
+    modalPriority: 'Öncelik *',
+    modalAppliedDate: 'Başvuru Tarihi *',
+    modalStagesDesc: 'Bu başvurunun aşamalarını seçin veya kendiniz ekleyin.',
+    modalTemplateStandard: 'Standart',
+    modalTemplateFast: 'Hızlı',
+    modalTemplateDetailed: 'Detaylı',
+    modalTemplateEmpty: 'Boş',
+    modalNewStagePlaceholder: 'Yeni aşama adı...',
+    modalAdd: 'Ekle',
+    modalStageDeadlineTitle: 'Aşama Son Tarihi (Deadline)',
+    modalDeleteStageTitle: 'Aşamayı Sil',
+    modalFinalDesc: 'Son kontroller ve isteğe bağlı detaylar.',
+    modalAppUrl: 'Başvuru URL',
+    modalGeneralNote: 'Genel Not',
+    modalGeneralNotePlaceholder: 'Maaş beklentisi, önemli detaylar...',
+    modalSummaryTitle: 'Özet',
+    modalSummaryStages: (n) => `${n} Aşamalı Süreç`,
+    modalSummaryPriority: 'Öncelik:',
+    modalBack: 'Geri',
+    modalNext: 'İleri',
+    modalSaving: 'Kaydediliyor...',
+    modalSave: 'Başvuruyu Kaydet ✓',
+    stageTemplates: {
+      standart: ['Online Başvuru Yapıldı', 'IK Görüşmesi', 'Teknik Mülakat', 'Teklif'],
+      hizli: ['Online Başvuru Yapıldı', 'Mülakat', 'Sonuç'],
+      detayli: ['Online Başvuru Yapıldı', 'CV Gönderildi', 'Online Test', 'IK Görüşmesi', 'Teknik Mülakat', 'Final Mülakatı', 'Referans Kontrolü', 'Teklif Alındı'],
+      bos: [],
+    },
+    guideNav: 'Rehber',
+    guideTitle: 'StajTakip\'e Hoş Geldin! 🎉',
+    guideSubtitle: 'Uygulamayı en iyi şekilde kullanmak için hızlı bir özet.',
+    guideContinue: 'Başlayalim',
+    guideDontShow: 'Bir daha gösterme',
+    guideSteps: [
+      { icon: '📥', title: 'Başvuru Ekle', desc: 'Sağ alttaki ➕ butonuna tıklayarak yeni staj başvurusu ekle. Şirket adı, pozisyon, şehir ve öncelik bilgilerini gir.' },
+      { icon: '📋', title: 'Aşama Takibi', desc: 'Her başvurunun aşamaları var (Başvuruldu → Mülakat → Teklif). Aşamaları Devam Ediyor veya Tamamlandı olarak işaretle.' },
+      { icon: '📅', title: 'Takvim', desc: 'Takvim sayfasında tüm aşama deadlinelarını görebilirsin. Bugüne yakın olanlar vurgulanir.' },
+      { icon: '📊', title: 'İstatistikler', desc: 'İstatistikler sayfası başvurularının durum, öncelik ve aylık trend grafikleri ile durumunu gösterir.' },
+      { icon: '💾', title: 'Yedekleme & İçe Aktarma', desc: 'Ayarlar → Veri Yönetimi\'nden verilerini JSON dosyası olarak dışa aktar veya yedekten geri yükle.' },
+    ],
   },
 };
 
@@ -378,7 +597,7 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(undefine
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const stored = localStorage.getItem('stajtakip-language') as Language | null;
-    return stored && ['en', 'tr', 'de'].includes(stored) ? stored : 'en';
+    return stored && ['en', 'tr'].includes(stored) ? stored : 'en';
   });
 
   const setLanguage = (lang: Language) => {
