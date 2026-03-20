@@ -148,9 +148,11 @@ export function NewAppModal() {
 
   const resetAndClose = () => {
     setStep(1);
+    setSaving(false);
     setFormData({
       companyName: '', position: '', priority: 'Orta', status: 'Başvuruldu', appliedDate: format(new Date(), 'yyyy-MM-dd'), stages: []
     });
+    setStagesList(STAGE_TEMPLATES.standart.map(s => ({ id: uuidv4(), name: s, deadline: '' })));
     closeNewAppModal();
   };
 
