@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import type { Application } from '../types';
-import { isBefore, addDays, isAfter, formatDistanceToNow, parseISO } from 'date-fns';
-import { tr } from 'date-fns/locale';
-import { Search, Plus, List, Grid, Edit, MoreVertical, Trash, Copy } from 'lucide-react';
+import { isBefore, addDays, formatDistanceToNow, parseISO } from 'date-fns';
+import { tr as trLocale, enUS, de as deLocale, type Locale } from 'date-fns/locale';
+import { Search, Plus, List, Grid, MoreVertical } from 'lucide-react';
 import { cn } from '../lib/utils';
-// import { Button } from '@/components/ui/button'; 
-// import { Card, CardContent } from '@/components/ui/card';
+import { useLanguage, type Language } from '../contexts/LanguageContext';
+
+const localeMap: Record<Language, Locale> = {
+  tr: trLocale,
+  en: enUS,
+  de: deLocale,
+};
 
 // Instead of UI library components that might be missing, I'll use standard Tailwind to ensure it works properly, but I will simulate the Shadcn look in case it isn't properly wired.
 const Card = ({ children, className }: any) => <div className={cn("rounded-xl border bg-card text-card-foreground shadow", className)}>{children}</div>;
@@ -40,6 +45,8 @@ const Badge = ({ children, className, variant = "default" }: any) => {
 }
 
 function SummaryCards({ apps }: { apps: Application[] }) {
+  const { t } = useLanguage();
+
   const stats = {
     total: apps.length,
     active: apps.filter(a => !['Kabul', 'Red', 'İptal'].includes(a.status)).length,
@@ -50,12 +57,12 @@ function SummaryCards({ apps }: { apps: Application[] }) {
   };
 
   const cards = [
-    { label: 'Toplam', value: stats.total, color: 'text-gray-500', bg: 'bg-gray-100 dark:bg-gray-800' },
-    { label: 'Aktif', value: stats.active, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-    { label: 'Kabul', value: stats.accepted, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/30' },
-    { label: 'Red', value: stats.rejected, color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/30' },
-    { label: 'Beklemede', value: stats.waiting, color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
-    { label: 'Yaklaşan', value: stats.urgent, color: 'text-orange-500', bg: 'bg-orange-100 dark:bg-orange-900/30' },
+    { label: t.statTotal,    value: stats.total,    color: 'text-gray-500',   bg: 'bg-gray-100 dark:bg-gray-800' },
+    { label: t.statActive,   value: stats.active,   color: 'text-blue-500',   bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    { label: t.statAccepted, value: stats.accepted, color: 'text-green-500',  bg: 'bg-green-100 dark:bg-green-900/30' },
+    { label: t.statRejected, value: stats.rejected, color: 'text-red-500',    bg: 'bg-red-100 dark:bg-red-900/30' },
+    { label: t.statWaiting,  value: stats.waiting,  color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
+    { label: t.statUpcoming, value: stats.urgent,   color: 'text-orange-500', bg: 'bg-orange-100 dark:bg-orange-900/30' },
   ];
 
   return (
@@ -73,7 +80,10 @@ function SummaryCards({ apps }: { apps: Application[] }) {
 }
 
 function DeadlinePanel({ apps }: { apps: Application[] }) {
-  const allDeadlines = apps.flatMap(app => 
+  const { t, language } = useLanguage();
+  const locale = localeMap[language];
+
+  const allDeadlines = apps.flatMap(app =>
     app.stages
       .filter(s => s.deadline && s.status !== 'Tamamlandı' && s.status !== 'Atlandı')
       .map(s => ({
@@ -81,14 +91,14 @@ function DeadlinePanel({ apps }: { apps: Application[] }) {
         stage: s,
         date: parseISO(s.deadline!)
       }))
-  ).sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5); // top 5
+  ).sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5);
 
   if (allDeadlines.length === 0) return null;
 
   return (
     <Card className="mb-6 border-orange-200 dark:border-orange-900/50">
       <div className="p-4 border-b bg-orange-50/50 dark:bg-orange-900/10">
-        <h3 className="font-semibold text-orange-700 dark:text-orange-400">Yaklaşan Deadline'lar</h3>
+        <h3 className="font-semibold text-orange-700 dark:text-orange-400">{t.upcomingDeadlines}</h3>
       </div>
       <CardContent className="p-0">
         <div className="divide-y">
@@ -96,7 +106,7 @@ function DeadlinePanel({ apps }: { apps: Application[] }) {
             const isPast = isBefore(item.date, new Date());
             const daysLeft = Math.ceil((item.date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
             const isUrgent = daysLeft <= 3 && !isPast;
-            
+
             return (
               <div key={i} className="flex justify-between items-center p-4 hover:bg-muted/50 cursor-pointer">
                 <div>
@@ -107,9 +117,9 @@ function DeadlinePanel({ apps }: { apps: Application[] }) {
                   <Badge variant={isPast ? "destructive" : isUrgent ? "default" : "secondary"} className={
                     isUrgent && !isPast ? "bg-orange-500 hover:bg-orange-600 border-none" : ""
                   }>
-                    {isPast ? 'GEÇMİŞ' : isUrgent ? 'ACİL' : `${daysLeft} gün`}
+                    {isPast ? t.badgePast : isUrgent ? t.badgeUrgent : t.daysLeft(daysLeft)}
                   </Badge>
-                  <div className="text-xs font-mono">{formatDistanceToNow(item.date, { addSuffix: true, locale: tr })}</div>
+                  <div className="text-xs font-mono">{formatDistanceToNow(item.date, { addSuffix: true, locale })}</div>
                 </div>
               </div>
             );
@@ -125,7 +135,9 @@ import { useNavigate } from 'react-router-dom';
 
 function ApplicationCard({ app }: { app: Application }) {
   const navigate = useNavigate();
-  // A helper component for displaying a single application
+  const { t, language } = useLanguage();
+  const locale = localeMap[language];
+
   const priorityColor = {
     'Düşük': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     'Orta': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -155,10 +167,10 @@ function ApplicationCard({ app }: { app: Application }) {
             {app.location && `📍 ${app.location}`} {app.location && app.workModel && ' • '} {app.workModel && app.workModel}
           </p>
         </div>
-        
+
         <div className="mt-auto">
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-medium text-muted-foreground">İlerleme</span>
+            <span className="font-medium text-muted-foreground">{t.progress}</span>
             <span className="font-medium">{progressPercent}%</span>
           </div>
           <div className="w-full bg-secondary h-2 rounded-full overflow-hidden mb-4">
@@ -167,14 +179,14 @@ function ApplicationCard({ app }: { app: Application }) {
 
           <div className="space-y-1">
             {currentStage && (
-              <p className="text-xs truncate"><span className="text-muted-foreground">Sonraki:</span> {currentStage.name}</p>
+              <p className="text-xs truncate"><span className="text-muted-foreground">{t.next}</span> {currentStage.name}</p>
             )}
             <div className="flex justify-between items-center text-xs">
                <span className="font-medium px-2 py-0.5 rounded bg-muted">
                  {app.status}
                </span>
                <span className="text-muted-foreground text-[10px]">
-                 Gnc: {formatDistanceToNow(parseISO(app.updatedAt), { addSuffix: true, locale: tr })}
+                 {t.updated} {formatDistanceToNow(parseISO(app.updatedAt), { addSuffix: true, locale })}
                </span>
             </div>
           </div>
@@ -189,9 +201,10 @@ export function Dashboard() {
   const applications = useStore(state => state.applications);
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'grid'|'list'>('grid');
-  
-  const filteredApps = applications.filter(app => 
-    app.companyName.toLowerCase().includes(search.toLowerCase()) || 
+  const { t } = useLanguage();
+
+  const filteredApps = applications.filter(app =>
+    app.companyName.toLowerCase().includes(search.toLowerCase()) ||
     app.position.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -202,29 +215,28 @@ export function Dashboard() {
       </div>
 
       <SummaryCards apps={applications} />
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 space-y-6">
           <div className="flex gap-2 items-center flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input 
-                type="text" 
-                placeholder="Şirket veya pozisyon ara..." 
+              <input
+                type="text"
+                placeholder={t.searchPlaceholder}
                 className="w-full h-10 pl-9 pr-4 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            {/* Filter buttons can go here, omitted for brevity but easy to add later */}
             <div className="flex rounded-md border p-1 bg-muted/50">
-              <button 
-                onClick={() => setView('grid')} 
+              <button
+                onClick={() => setView('grid')}
                 className={cn("p-1.5 rounded-sm text-muted-foreground", view === 'grid' && "bg-background text-foreground shadow-sm")}
               >
                 <Grid className="w-4 h-4" />
               </button>
-              <button 
+              <button
                 onClick={() => setView('list')}
                 className={cn("p-1.5 rounded-sm text-muted-foreground", view === 'list' && "bg-background text-foreground shadow-sm")}
               >
@@ -238,10 +250,10 @@ export function Dashboard() {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <List className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold">Henüz başvuru yok</h3>
-              <p className="text-muted-foreground mb-6 max-w-sm">İlk staj başvurunu ekleyerek süreci takip etmeye başlayabilirsin.</p>
+              <h3 className="text-xl font-bold">{t.noAppsTitle}</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm">{t.noAppsDesc}</p>
               <Button>
-                <Plus className="w-4 h-4 mr-2" /> İlk Başvurunu Ekle
+                <Plus className="w-4 h-4 mr-2" /> {t.addFirstApp}
               </Button>
             </div>
           ) : (
@@ -255,7 +267,7 @@ export function Dashboard() {
             </div>
           )}
         </div>
-        
+
         <div className="lg:col-span-1">
           <DeadlinePanel apps={applications} />
         </div>

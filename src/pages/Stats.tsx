@@ -1,54 +1,55 @@
 import React from 'react';
 import { useStore } from '../store/useStore';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from 'recharts';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export function Stats() {
   const { applications } = useStore();
+  const { t } = useLanguage();
+  const currentYear = new Date().getFullYear();
 
   const statusCount = [
-    { name: 'Kabul', value: applications.filter(a => a.status === 'Kabul').length, color: '#10b981' },
-    { name: 'Red', value: applications.filter(a => a.status === 'Red').length, color: '#ef4444' },
-    { name: 'Devam Ediyor', value: applications.filter(a => !['Kabul', 'Red', 'İptal'].includes(a.status)).length, color: '#3b82f6' },
+    { name: t.statusAccepted, value: applications.filter(a => a.status === 'Kabul').length, color: '#10b981' },
+    { name: t.statusRejected, value: applications.filter(a => a.status === 'Red').length, color: '#ef4444' },
+    { name: t.statusOngoing, value: applications.filter(a => !['Kabul', 'Red', 'İptal'].includes(a.status)).length, color: '#3b82f6' },
   ].filter(i => i.value > 0);
 
   const priorityCount = [
-    { name: 'Kritik', value: applications.filter(a => a.priority === 'Kritik').length, color: '#ef4444' },
-    { name: 'Yüksek', value: applications.filter(a => a.priority === 'Yüksek').length, color: '#f97316' },
-    { name: 'Orta', value: applications.filter(a => a.priority === 'Orta').length, color: '#3b82f6' },
-    { name: 'Düşük', value: applications.filter(a => a.priority === 'Düşük').length, color: '#10b981' },
+    { name: t.priorityCritical, value: applications.filter(a => a.priority === 'Kritik').length, color: '#ef4444' },
+    { name: t.priorityHigh,     value: applications.filter(a => a.priority === 'Yüksek').length, color: '#f97316' },
+    { name: t.priorityMedium,   value: applications.filter(a => a.priority === 'Orta').length, color: '#3b82f6' },
+    { name: t.priorityLow,      value: applications.filter(a => a.priority === 'Düşük').length, color: '#10b981' },
   ].filter(i => i.value > 0);
 
-  const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-  const currentYear = new Date().getFullYear();
-  
-  const monthlyData = months.map((month, index) => {
+  const monthlyData = t.monthNames.map((month, index) => {
     const appsInMonth = applications.filter(a => {
       const d = new Date(a.appliedDate);
       return d.getMonth() === index && d.getFullYear() === currentYear;
     });
     return {
       name: month,
-      Sayi: appsInMonth.length
+      // keep key language-neutral so Recharts legend/bar always finds it
+      count: appsInMonth.length,
     };
   });
 
   if (applications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full">
-         <h3 className="text-xl font-bold">Veri Yok</h3>
-         <p className="text-muted-foreground mt-2">İstatistikleri görebilmek için en az bir başvuru eklemelisiniz.</p>
+         <h3 className="text-xl font-bold">{t.statsNoData}</h3>
+         <p className="text-muted-foreground mt-2">{t.statsNoDataDesc}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 pb-20 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold tracking-tight">İstatistikler</h1>
-      <p className="text-muted-foreground">Başvurularınızın özet analizleri ve başarı grafikleri.</p>
+      <h1 className="text-3xl font-bold tracking-tight">{t.statsTitle}</h1>
+      <p className="text-muted-foreground">{t.statsSubtitle}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-card p-6 rounded-xl border shadow-sm">
-           <h3 className="text-lg font-semibold mb-6 text-center">Durum Dağılımı</h3>
+           <h3 className="text-lg font-semibold mb-6 text-center">{t.statsStatusDist}</h3>
            <div className="h-[300px] w-full">
              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -64,7 +65,7 @@ export function Stats() {
         </div>
 
         <div className="bg-card p-6 rounded-xl border shadow-sm">
-           <h3 className="text-lg font-semibold mb-6 text-center">Öncelik Dağılımı</h3>
+           <h3 className="text-lg font-semibold mb-6 text-center">{t.statsPriorityDist}</h3>
            <div className="h-[300px] w-full">
              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -80,7 +81,7 @@ export function Stats() {
         </div>
 
         <div className="bg-card p-6 rounded-xl border shadow-sm md:col-span-2">
-           <h3 className="text-lg font-semibold mb-6 text-center">{currentYear} Yılı Başvuru Trendi</h3>
+           <h3 className="text-lg font-semibold mb-6 text-center">{t.statsMonthlyTrend(currentYear)}</h3>
            <div className="h-[350px] w-full">
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={monthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -88,7 +89,7 @@ export function Stats() {
                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
                  <RechartsTooltip cursor={{fill: 'hsl(var(--muted))'}} contentStyle={{borderRadius: '8px', border: '1px solid hsl(var(--border))'}} />
-                 <Bar dataKey="Sayi" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40} />
+                 <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40} />
                </BarChart>
              </ResponsiveContainer>
            </div>

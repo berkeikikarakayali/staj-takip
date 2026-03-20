@@ -7,6 +7,7 @@ import { useStore } from './store/useStore';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 function AppRoutes() {
   const theme = useStore(state => state.theme);
@@ -54,11 +55,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <HashRouter>
-        <AppRoutes />
-      </HashRouter>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <HashRouter>
+          <AppRoutes />
+        </HashRouter>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

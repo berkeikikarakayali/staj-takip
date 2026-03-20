@@ -14,18 +14,20 @@ import {
 import { cn } from '../lib/utils';
 import { useStore } from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { NewAppModal } from './NewAppModal';
 
 export function Layout() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const navItems = [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/calendar', icon: CalendarDays, label: 'Takvim' },
-    { to: '/stats', icon: BarChart3, label: 'İstatistikler' },
-    { to: '/settings', icon: Settings, label: 'Ayarlar' },
+    { to: '/', icon: LayoutDashboard, label: t.dashboard },
+    { to: '/calendar', icon: CalendarDays, label: t.calendar },
+    { to: '/stats', icon: BarChart3, label: t.stats },
+    { to: '/settings', icon: Settings, label: t.settings },
   ];
 
   const handleSignOut = async () => {
@@ -69,7 +71,7 @@ export function Layout() {
               className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
             >
               <User className="w-4 h-4 text-muted-foreground" />
-              Profilim & Ayarlar
+              {t.profileAndSettings}
             </button>
             <div className="my-1 border-t" />
             <button
@@ -77,7 +79,7 @@ export function Layout() {
               className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-destructive hover:bg-destructive/10 transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              Çıkış Yap
+              {t.signOut}
             </button>
           </div>
         </>
@@ -157,7 +159,7 @@ export function Layout() {
       <button 
         onClick={useStore.getState().openNewAppModal}
         className="fixed bottom-20 md:bottom-10 right-6 md:right-10 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 focus:outline-none focus:ring-4 focus:ring-primary/30"
-        title="Yeni Başvuru Ekle"
+        title={t.addNew}
       >
         <Plus className="w-6 h-6" />
       </button>
