@@ -17,7 +17,7 @@ If you're applying to multiple internships at once and losing track, this app wi
 - ✅ Access your data from any device, everything stays synced
 - ✅ Dark mode / Light mode
 - ✅ Works on mobile
-- ✅ Turkish, English and German language options
+- ✅ Turkish and English language options
 
 ## Tech Stack
 
