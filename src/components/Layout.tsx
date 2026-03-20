@@ -1,9 +1,9 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  CalendarDays, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  CalendarDays,
+  BarChart3,
   Settings,
   BriefcaseBusiness,
   Plus,
@@ -107,8 +107,8 @@ export function Layout() {
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  isActive 
-                    ? "bg-primary text-primary-foreground" 
+                  isActive
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )
               }
@@ -146,8 +146,8 @@ export function Layout() {
               className={({ isActive }) =>
                 cn(
                   "flex flex-col items-center justify-center w-16 p-1 rounded-md text-[10px] font-medium transition-colors",
-                  isActive 
-                    ? "text-primary" 
+                  isActive
+                    ? "text-primary"
                     : "text-muted-foreground hover:bg-muted"
                 )
               }
@@ -160,7 +160,7 @@ export function Layout() {
       </main>
 
       {/* Floating Action Button - Global */}
-      <button 
+      <button
         onClick={useStore.getState().openNewAppModal}
         className="fixed bottom-20 md:bottom-8 right-5 md:right-8 w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-colors flex items-center justify-center z-40"
         title={t.addNew}
