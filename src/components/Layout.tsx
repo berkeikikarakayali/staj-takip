@@ -9,24 +9,28 @@ import {
   Plus,
   LogOut,
   User,
-  ChevronDown
+  ChevronDown,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStore } from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { NewAppModal } from './NewAppModal';
+import { GuideModal, checkShouldShowGuide } from './GuideModal';
 
 export function Layout() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [showGuide, setShowGuide] = useState(() => checkShouldShowGuide());
   const { t } = useLanguage();
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t.dashboard },
     { to: '/calendar', icon: CalendarDays, label: t.calendar },
     { to: '/stats', icon: BarChart3, label: t.stats },
+    { to: '/guide', icon: BookOpen, label: t.guideNav },
     { to: '/settings', icon: Settings, label: t.settings },
   ];
 
@@ -65,7 +69,7 @@ export function Layout() {
       {userMenuOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-          <div className="absolute bottom-full mb-2 left-0 right-0 z-50 bg-popover border rounded-lg shadow-lg p-1 min-w-[180px]">
+          <div className="absolute bottom-full mb-2 left-0 right-0 z-50 bg-popover border rounded-md p-1 min-w-[180px]">
             <button
               onClick={() => { navigate('/settings'); setUserMenuOpen(false); }}
               className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
@@ -91,7 +95,7 @@ export function Layout() {
     <div className="flex h-[100dvh] bg-muted/20">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex flex-col w-64 border-r bg-background">
-        <div className="p-6 border-b flex items-center gap-2">
+        <div className="px-4 py-3 border-b flex items-center gap-2">
           <BriefcaseBusiness className="w-6 h-6 text-primary" />
           <span className="font-bold text-xl">StajTakip</span>
         </div>
@@ -158,12 +162,18 @@ export function Layout() {
       {/* Floating Action Button - Global */}
       <button 
         onClick={useStore.getState().openNewAppModal}
-        className="fixed bottom-20 md:bottom-10 right-6 md:right-10 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 focus:outline-none focus:ring-4 focus:ring-primary/30"
+        className="fixed bottom-20 md:bottom-8 right-5 md:right-8 w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-colors flex items-center justify-center z-40"
         title={t.addNew}
       >
         <Plus className="w-6 h-6" />
       </button>
 
+      {showGuide && (
+        <GuideModal
+          onClose={() => setShowGuide(false)}
+          onDontShow={() => setShowGuide(false)}
+        />
+      )}
       <NewAppModal />
     </div>
   );

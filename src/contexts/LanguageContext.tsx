@@ -195,6 +195,34 @@ export interface Translations {
     desc: string;
     icon: string;
   }[];
+
+  // Auth Pages
+  authLoginTitle: string;
+  authLoginDesc: string;
+  authEmail: string;
+  authEmailPlaceholder: string;
+  authPassword: string;
+  authPasswordPlaceholder: string;
+  authForgotPassword: string;
+  authLoginBtn: string;
+  authLoggingIn: string;
+  authNoAccount: string;
+  authRegisterLink: string;
+
+  authRegisterTitle: string;
+  authRegisterDesc: string;
+  authFullName: string;
+  authFullNamePlaceholder: string;
+  authPasswordConfirm: string;
+  authUniversity: string;
+  authUniversityPlaceholder: string;
+  authDepartment: string;
+  authDepartmentPlaceholder: string;
+  authRegisterBtn: string;
+  authRegistering: string;
+  authHasAccount: string;
+  authLoginLink: string;
+  authOptional: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -390,6 +418,33 @@ const translations: Record<Language, Translations> = {
       { icon: '📊', title: 'Statistics', desc: 'The Statistics page shows charts of your application statuses, priorities, and monthly trends.' },
       { icon: '💾', title: 'Backup & Import', desc: 'Go to Settings → Data Management to export your data as a JSON file or restore from a backup.' },
     ],
+
+    authLoginTitle: 'Sign In',
+    authLoginDesc: 'Sign in to manage your internship applications.',
+    authEmail: 'Email',
+    authEmailPlaceholder: 'example@email.com',
+    authPassword: 'Password',
+    authPasswordPlaceholder: '••••••••',
+    authForgotPassword: 'Forgot password?',
+    authLoginBtn: 'Sign In',
+    authLoggingIn: 'Signing in...',
+    authNoAccount: "Don't have an account?",
+    authRegisterLink: 'Sign Up',
+
+    authRegisterTitle: 'Sign Up',
+    authRegisterDesc: 'Create an account to start tracking your internships.',
+    authFullName: 'Full Name *',
+    authFullNamePlaceholder: 'John Doe',
+    authPasswordConfirm: 'Confirm Password *',
+    authUniversity: 'University',
+    authUniversityPlaceholder: 'e.g., MIT',
+    authDepartment: 'Department',
+    authDepartmentPlaceholder: 'e.g., Computer Science',
+    authRegisterBtn: 'Sign Up',
+    authRegistering: 'Signing up...',
+    authHasAccount: 'Already have an account?',
+    authLoginLink: 'Sign In',
+    authOptional: '(optional)',
   },
   tr: {
     dashboard: 'Dashboard',
@@ -583,6 +638,33 @@ const translations: Record<Language, Translations> = {
       { icon: '📊', title: 'İstatistikler', desc: 'İstatistikler sayfası başvurularının durum, öncelik ve aylık trend grafikleri ile durumunu gösterir.' },
       { icon: '💾', title: 'Yedekleme & İçe Aktarma', desc: 'Ayarlar → Veri Yönetimi\'nden verilerini JSON dosyası olarak dışa aktar veya yedekten geri yükle.' },
     ],
+
+    authLoginTitle: 'Giriş Yap',
+    authLoginDesc: 'Staj başvurularını yönetmek için giriş yap.',
+    authEmail: 'E-posta',
+    authEmailPlaceholder: 'ornek@posta.com',
+    authPassword: 'Şifre',
+    authPasswordPlaceholder: '••••••••',
+    authForgotPassword: 'Şifremi unuttum',
+    authLoginBtn: 'Giriş Yap',
+    authLoggingIn: 'Giriş yapılıyor...',
+    authNoAccount: 'Hesabın yok mu?',
+    authRegisterLink: 'Kayıt Ol',
+
+    authRegisterTitle: 'Kayıt Ol',
+    authRegisterDesc: 'Hesap oluşturarak staj takibine başla.',
+    authFullName: 'Ad Soyad *',
+    authFullNamePlaceholder: 'Ahmet Yılmaz',
+    authPasswordConfirm: 'Tekrar *',
+    authUniversity: 'Üniversite',
+    authUniversityPlaceholder: 'Örn: ODTÜ',
+    authDepartment: 'Bölüm',
+    authDepartmentPlaceholder: 'Örn: Bilgisayar Müh.',
+    authRegisterBtn: 'Kayıt Ol',
+    authRegistering: 'Kayıt olunuyor...',
+    authHasAccount: 'Zaten hesabın var mı?',
+    authLoginLink: 'Giriş Yap',
+    authOptional: '(opsiyonel)',
   },
 };
 

@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard, CalendarView, Stats, Settings, LoginPage, RegisterPage, ForgotPasswordPage } from './pages';
 import { ApplicationDetail } from './pages/ApplicationDetail';
+import { GuidePage } from './pages/Guide';
 import { useStore } from './store/useStore';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="calendar" element={<CalendarView />} />
           <Route path="stats" element={<Stats />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="guide" element={<GuidePage />} />
         </Route>
       </Route>
     </Routes>

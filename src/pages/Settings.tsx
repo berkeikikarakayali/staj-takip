@@ -5,8 +5,8 @@ import { format } from 'date-fns';
 import { useLanguage, type Language } from '../contexts/LanguageContext';
 
 const LANGUAGES: { code: Language; flag: string }[] = [
-  { code: 'en', flag: '🇬🇧' },
-  { code: 'tr', flag: '🇹🇷' },
+  { code: 'en', flag: 'EN' },
+  { code: 'tr', flag: 'TR' },
 ];
 
 export function Settings() {
@@ -75,8 +75,8 @@ export function Settings() {
       </div>
 
       {/* Language Section */}
-      <div className="bg-card rounded-xl border overflow-hidden shadow-sm">
-        <div className="p-6 border-b flex items-center gap-2">
+      <div className="border rounded-md bg-card">
+        <div className="px-4 py-3 border-b flex items-center gap-2">
           <Globe className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-semibold">{t.languageSection}</h2>
         </div>
@@ -102,8 +102,8 @@ export function Settings() {
       </div>
 
       {/* Theme Section */}
-      <div className="bg-card rounded-xl border overflow-hidden shadow-sm">
-        <div className="p-6 border-b flex items-center gap-2">
+      <div className="border rounded-md bg-card">
+        <div className="px-4 py-3 border-b flex items-center gap-2">
           <Palette className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-semibold">{t.themeSection}</h2>
         </div>
@@ -130,9 +130,9 @@ export function Settings() {
       </div>
 
       {/* Data Management */}
-      <div className="bg-card rounded-xl border overflow-hidden shadow-sm">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold">{t.dataSection}</h2>
+      <div className="border rounded-md bg-card">
+        <div className="px-4 py-3 border-b">
+          <h2 className="font-semibold">{t.dataSection}</h2>
           <p className="text-sm text-muted-foreground mt-1">{t.dataSectionDesc}</p>
         </div>
 
@@ -163,8 +163,8 @@ export function Settings() {
       </div>
 
       {/* Danger Zone */}
-      <div className="bg-destructive/10 border-destructive/20 rounded-xl border overflow-hidden">
-        <div className="p-6 border-b border-destructive/20 flex items-center gap-2">
+      <div className="border border-destructive/30 rounded-md">
+        <div className="px-4 py-3 border-b border-destructive/30 flex items-center gap-2">
           <ShieldAlert className="text-destructive w-5 h-5" />
           <h2 className="text-xl font-semibold text-destructive">{t.dangerZone}</h2>
         </div>
