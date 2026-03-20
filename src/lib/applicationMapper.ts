@@ -63,7 +63,7 @@ export function rowToApp(row: any, stageRows: any[]): Application {
       id: s.id,
       name: s.name,
       status: (stageStatusFromDb[s.status] ?? s.status) as StageStatus,
-      deadline: s.deadline ?? undefined,
+      deadline: s.deadline ? (s.deadline as string).slice(0, 10) : undefined,
       note: s.note ?? undefined,
     }));
 
